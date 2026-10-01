@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.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}`,
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -26,4 +26,4 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
-      }
+}
