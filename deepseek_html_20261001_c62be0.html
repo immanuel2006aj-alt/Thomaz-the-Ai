@@ -1,0 +1,2628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Thomaz AI — Private Intelligence Workspace</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base: #07080d;
+      --bg-secondary: #0d0f16;
+      --panel: #11141c;
+      --elevated: #171a23;
+      --border: #242936;
+      --border-strong: #303644;
+      --text-primary: #f5f7fb;
+      --text-secondary: #a6adbb;
+      --text-muted: #6f7787;
+      --violet: #7c3aed;
+      --cyan: #06b6d4;
+      --gradient: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --sidebar-width: 260px;
+      --context-width: 300px;
+      --topbar-height: 56px;
+      --composer-min-height: 120px;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-text-size-adjust: 100%;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      line-height: 1.5;
+      overflow: hidden;
+      height: 100dvh;
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-strong);
+    }
+
+    /* ===== APP SHELL ===== */
+    .app-shell {
+      display: flex;
+      height: 100dvh;
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      z-index: 100;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar.open {
+      display: flex;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 10000;
+      box-shadow: 4px 0 32px rgba(0, 0, 0, 0.6);
+    }
+
+    .sidebar-header {
+      padding: 16px 16px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .brand svg {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .brand-text .primary {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-primary);
+    }
+
+    .brand-text .secondary {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .online-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 100px;
+      font-weight: 500;
+    }
+
+    .online-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .sidebar-nav {
+      padding: 12px 10px;
+      flex-shrink: 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      min-height: 40px;
+    }
+
+    .nav-item:hover {
+      background: var(--panel);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--panel);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .nav-item .badge {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: var(--elevated);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .new-chat-btn {
+      margin: 0 10px 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--gradient);
+      color: white;
+      font-weight: 600;
+      font-size: 13px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      min-height: 42px;
+      font-family: inherit;
+      letter-spacing: 0.01em;
+    }
+
+    .new-chat-btn:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 24px rgba(124, 58, 237, 0.3);
+    }
+
+    .new-chat-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .sidebar-section {
+      padding: 0 10px;
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      padding: 8px 12px 6px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      min-height: 38px;
+    }
+
+    .history-item:hover {
+      background: var(--panel);
+      color: var(--text-primary);
+    }
+
+    .history-item.active {
+      background: var(--panel);
+      color: var(--text-primary);
+    }
+
+    .history-item svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      opacity: 0.6;
+    }
+
+    .history-item .title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sidebar-footer {
+      padding: 12px 10px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .profile-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      min-height: 44px;
+    }
+
+    .profile-mini:hover {
+      background: var(--panel);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+      overflow: hidden;
+    }
+
+    .profile-info .name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-info .role {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ===== MAIN WORKSPACE ===== */
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      min-width: 0;
+      background: var(--bg-base);
+      position: relative;
+    }
+
+    /* ===== TOPBAR ===== */
+    .topbar {
+      height: var(--topbar-height);
+      min-height: var(--topbar-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(7, 8, 13, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 50;
+      gap: 8px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      min-width: 36px;
+      min-height: 36px;
+    }
+
+    .icon-btn:hover {
+      background: var(--panel);
+      color: var(--text-primary);
+    }
+
+    .icon-btn:focus-visible {
+      outline: 2px solid var(--violet);
+      outline-offset: 2px;
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .mobile-menu-btn {
+      display: flex;
+    }
+
+    .session-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      flex: 1;
+      gap: 1px;
+    }
+
+    .session-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-status {
+      font-size: 11px;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .model-pill {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 100px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .model-pill:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .model-pill svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ===== CHAT BOX ===== */
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 16px 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      min-height: 0;
+      position: relative;
+    }
+
+    .chat-box::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      flex: 1;
+      min-height: 0;
+      gap: 8px;
+      animation: fade-up 0.6s ease;
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .empty-logo {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 8px;
+      animation: logo-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes logo-glow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(124, 58, 237, 0.3)); }
+      50% { filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.4)); }
+    }
+
+    .empty-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+
+    .empty-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 360px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .prompt-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      max-width: 520px;
+      width: 100%;
+      padding: 0 4px;
+    }
+
+    .prompt-chip {
+      padding: 9px 16px;
+      border-radius: 100px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      line-height: 1.3;
+      text-align: left;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .prompt-chip:hover {
+      background: var(--elevated);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .prompt-chip svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    /* ===== MESSAGE STYLES ===== */
+    .user-message-style {
+      align-self: flex-end;
+      max-width: min(720px, 88%);
+      background: var(--elevated);
+      border: 1px solid #2a3040;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text-primary);
+      word-break: break-word;
+      overflow-wrap: break-word;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      animation: msg-in 0.25s ease;
+    }
+
+    @keyframes msg-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .shadow-message-style {
+      align-self: flex-start;
+      max-width: min(820px, 92%);
+      width: 100%;
+      display: flex;
+      gap: 10px;
+      animation: msg-in 0.25s ease;
+    }
+
+    .ai-avatar {
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      border-radius: 8px;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .ai-avatar svg {
+      width: 16px;
+      height: 16px;
+      color: white;
+    }
+
+    .ai-message-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ai-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .ai-response-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .ai-timestamp {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* ===== LOADING INDICATOR ===== */
+    #loading-indicator {
+      align-self: flex-start;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      max-width: min(300px, 80%);
+      animation: msg-in 0.25s ease;
+    }
+
+    #loading-indicator::before {
+      content: '';
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--border-strong);
+      border-top-color: var(--violet);
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== COMPOSER ===== */
+    .composer-shell {
+      padding: 8px 12px 12px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+      background: var(--bg-base);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      z-index: 40;
+    }
+
+    .composer-inner {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 4px 4px 4px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .composer-inner:focus-within {
+      border-color: var(--violet);
+      box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px rgba(124, 58, 237, 0.08);
+      animation: focus-glow 3s ease infinite;
+    }
+
+    @keyframes focus-glow {
+      0%, 100% { border-color: var(--violet); box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px rgba(124, 58, 237, 0.08); }
+      50% { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan), 0 0 0 4px rgba(6, 182, 212, 0.08); }
+    }
+
+    #your-input-id {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      resize: none;
+      min-height: 48px;
+      max-height: 160px;
+      padding: 10px 8px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    #your-input-id::placeholder {
+      color: var(--text-muted);
+    }
+
+    #your-input-id::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .composer-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 4px 4px;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .composer-left-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-wrap: wrap;
+    }
+
+    .composer-right-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .composer-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      min-width: 34px;
+      min-height: 34px;
+    }
+
+    .composer-icon-btn:hover {
+      background: var(--elevated);
+      color: var(--text-primary);
+    }
+
+    .composer-icon-btn:focus-visible {
+      outline: 2px solid var(--violet);
+      outline-offset: 1px;
+    }
+
+    .composer-icon-btn svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .char-counter {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      padding: 0 4px;
+      display: none;
+    }
+
+    .send-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: none;
+      background: var(--gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      min-width: 38px;
+      min-height: 38px;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .send-btn.active {
+      opacity: 1;
+      pointer-events: auto;
+      box-shadow: 0 0 16px rgba(124, 58, 237, 0.35);
+    }
+
+    .send-btn.active:hover {
+      filter: brightness(1.15);
+      box-shadow: 0 0 24px rgba(124, 58, 237, 0.5);
+      transform: scale(1.02);
+    }
+
+    .send-btn.active:active {
+      transform: scale(0.95);
+    }
+
+    .send-btn:focus-visible {
+      outline: 2px solid var(--violet);
+      outline-offset: 2px;
+    }
+
+    .send-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ===== CONTEXT PANEL ===== */
+    .context-panel {
+      width: var(--context-width);
+      min-width: var(--context-width);
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      z-index: 90;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .context-panel.open {
+      display: flex;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10000;
+      box-shadow: -4px 0 32px rgba(0, 0, 0, 0.6);
+    }
+
+    .context-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .context-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .context-section {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .context-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .context-value {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .context-value .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      flex-shrink: 0;
+    }
+
+    .context-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    .context-stat .stat-value {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ===== BACKDROP ===== */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 9000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ===== DRAWER OVERRIDES ===== */
+    .drawer {
+      pointer-events: auto;
+      opacity: 1;
+      filter: none;
+    }
+
+    /* ===== SETTINGS DRAWER ===== */
+    .settings-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(400px, 92vw);
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      z-index: 10000;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: -8px 0 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .settings-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+    }
+
+    .drawer-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 16px 24px;
+    }
+
+    .settings-group {
+      margin-bottom: 20px;
+    }
+
+    .settings-group-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      padding: 8px 0 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      gap: 12px;
+      min-height: 44px;
+    }
+
+    .settings-row-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-row-label svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+    }
+
+    .settings-input {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 6px 10px;
+      font-size: 12px;
+      font-family: var(--font-sans);
+      width: 160px;
+      outline: none;
+      transition: border-color 0.15s ease;
+      min-height: 34px;
+    }
+
+    .settings-input:focus {
+      border-color: var(--violet);
+    }
+
+    /* ===== TOGGLE ===== */
+    .toggle {
+      width: 40px;
+      height: 22px;
+      border-radius: 100px;
+      background: var(--border);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border: none;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .toggle.on {
+      background: var(--violet);
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.2s ease;
+    }
+
+    .toggle.on::after {
+      transform: translateX(18px);
+    }
+
+    .toggle:focus-visible {
+      outline: 2px solid var(--violet);
+      outline-offset: 2px;
+    }
+
+    /* ===== TOASTS ===== */
+    .toast-container {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      width: min(360px, 92vw);
+    }
+
+    .toast {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      pointer-events: auto;
+      animation: toast-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      line-height: 1.4;
+    }
+
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.error { border-left: 3px solid var(--error); }
+    .toast.info { border-left: 3px solid var(--cyan); }
+
+    .toast svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .toast.success svg { color: var(--success); }
+    .toast.error svg { color: var(--error); }
+    .toast.info svg { color: var(--cyan); }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ===== SEARCH OVERLAY ===== */
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 15000;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 80px 16px 16px;
+    }
+
+    .search-overlay.open {
+      display: flex;
+    }
+
+    .search-modal {
+      background: var(--panel);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      width: min(560px, 100%);
+      max-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+      animation: fade-up 0.2s ease;
+    }
+
+    .search-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-input-wrapper svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .search-input-wrapper input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: var(--font-sans);
+    }
+
+    .search-input-wrapper input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-results {
+      overflow-y: auto;
+      padding: 8px;
+      flex: 1;
+    }
+
+    .search-result-item {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 13px;
+      transition: background 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search-result-item:hover {
+      background: var(--elevated);
+      color: var(--text-primary);
+    }
+
+    .search-result-item svg {
+      width: 15px;
+      height: 15px;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    .search-empty {
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ===== RESPONSIVE BREAKPOINTS ===== */
+    @media (min-width: 600px) {
+      .chat-box {
+        padding: 20px 20px 8px;
+      }
+
+      .composer-shell {
+        padding: 10px 20px 16px;
+      }
+
+      .topbar {
+        padding: 0 16px;
+      }
+
+      .model-pill {
+        display: flex;
+      }
+
+      .prompt-chip {
+        font-size: 13px;
+        padding: 10px 18px;
+      }
+
+      .char-counter {
+        display: block;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .chat-box {
+        padding: 24px 32px 8px;
+        gap: 16px;
+      }
+
+      .composer-shell {
+        padding: 12px 32px 20px;
+      }
+
+      .topbar {
+        padding: 0 20px;
+      }
+
+      .empty-title {
+        font-size: 26px;
+      }
+
+      .empty-subtitle {
+        font-size: 15px;
+      }
+
+      .toast-container {
+        top: 16px;
+        right: 16px;
+        left: auto;
+        transform: none;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .sidebar {
+        display: flex;
+        position: relative;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .sidebar.open {
+        position: relative;
+        box-shadow: none;
+      }
+
+      .context-panel {
+        display: flex;
+        position: relative;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .context-panel.open {
+        position: relative;
+        box-shadow: none;
+      }
+
+      .mobile-menu-btn {
+        display: none;
+      }
+
+      .backdrop {
+        display: none;
+      }
+
+      .chat-box {
+        padding: 28px 40px 8px;
+      }
+
+      .composer-shell {
+        padding: 12px 40px 24px;
+      }
+
+      .topbar {
+        padding: 0 24px;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .chat-box {
+        padding: 32px 56px 8px;
+      }
+
+      .composer-shell {
+        padding: 12px 56px 28px;
+      }
+
+      .empty-title {
+        font-size: 30px;
+      }
+    }
+
+    @media (min-width: 1600px) {
+      .chat-box {
+        padding: 40px 80px 8px;
+      }
+
+      .composer-shell {
+        padding: 16px 80px 32px;
+      }
+    }
+
+    /* ===== MOBILE DRAWER ADJUSTMENTS ===== */
+    @media (max-width: 1023px) {
+      .sidebar {
+        display: none;
+      }
+
+      .sidebar.open {
+        display: flex;
+      }
+
+      .context-panel {
+        display: none;
+      }
+
+      .context-panel.open {
+        display: flex;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .sidebar.open,
+      .context-panel.open {
+        display: flex;
+      }
+    }
+
+    /* ===== REDUCED MOTION ===== */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      .empty-logo {
+        animation: none;
+      }
+
+      .composer-inner:focus-within {
+        animation: none;
+      }
+
+      .online-dot {
+        animation: none;
+      }
+    }
+
+    /* ===== UTILITY ===== */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BACKDROP -->
+  <div class="backdrop" id="backdrop"></div>
+
+  <!-- APP SHELL -->
+  <div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar drawer" id="sidebar" aria-label="Main navigation">
+      <div class="sidebar-header">
+        <div class="brand">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="2" y="2" width="28" height="28" rx="7" stroke="url(#brandGrad)" stroke-width="1.75" fill="none"/>
+            <path d="M10 11h12M16 11v11" stroke="url(#brandGrad)" stroke-width="2.2" stroke-linecap="round"/>
+            <circle cx="23" cy="9" r="2.2" fill="#06b6d4" stroke="none"/>
+            <circle cx="9" cy="23" r="1.6" fill="#7c3aed" stroke="none"/>
+            <defs>
+              <linearGradient id="brandGrad" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0%" stop-color="#7c3aed"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="brand-text">
+            <span class="primary">THOMAZ</span>
+            <span class="secondary">AI</span>
+          </div>
+        </div>
+        <div class="online-indicator">
+          <span class="online-dot"></span>
+          Online
+        </div>
+      </div>
+
+      <button class="new-chat-btn" id="newChatBtn" aria-label="Start new chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Chat
+      </button>
+
+      <nav class="sidebar-nav" aria-label="Primary">
+        <button class="nav-item active" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Chats
+          <span class="badge">12</span>
+        </button>
+        <button class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+          Workspace
+        </button>
+        <button class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            <line x1="9" y1="7" x2="15" y2="7"/>
+            <line x1="9" y1="11" x2="13" y2="11"/>
+          </svg>
+          Knowledge
+        </button>
+        <button class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          Activity
+        </button>
+      </nav>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Recent</div>
+        <button class="history-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="title">Project Architecture</span>
+        </button>
+        <button class="history-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="title">Website Redesign</span>
+        </button>
+        <button class="history-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="title">API Integration</span>
+        </button>
+        <button class="history-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="title">Security Review</span>
+        </button>
+        <button class="history-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="title">Marketing Strategy</span>
+        </button>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="nav-item" id="settingsBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Settings
+        </button>
+        <button class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Help
+        </button>
+        <button class="profile-mini" id="profileBtn">
+          <div class="avatar">TM</div>
+          <div class="profile-info">
+            <span class="name">Thomaz M.</span>
+            <span class="role">Private workspace</span>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="main-workspace">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="session-info">
+            <div class="session-title" id="sessionTitle">Project Architecture</div>
+            <div class="session-status">
+              <span class="status-dot"></span>
+              Connected
+            </div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="model-pill" aria-label="Current model">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+            </svg>
+            Thomaz AI
+          </button>
+          <button class="icon-btn" id="searchBtn" aria-label="Search conversations">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+          <button class="icon-btn" aria-label="Share conversation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3"/>
+              <circle cx="6" cy="12" r="3"/>
+              <circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="contextToggleBtn" aria-label="Toggle context panel" aria-expanded="false" aria-controls="contextPanel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="15" y1="3" x2="15" y2="21"/>
+            </svg>
+          </button>
+          <button class="icon-btn" aria-label="More options">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="19" cy="12" r="1"/>
+              <circle cx="5" cy="12" r="1"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- CHAT BOX -->
+      <section id="your-chat-box-id" class="chat-box" aria-live="polite" aria-label="Conversation"></section>
+
+      <!-- COMPOSER -->
+      <div class="composer-shell">
+        <div class="composer-inner">
+          <textarea
+            id="your-input-id"
+            placeholder="Message Thomaz AI…"
+            rows="1"
+            aria-label="Message input"
+            autocomplete="off"
+            spellcheck="true"
+          ></textarea>
+          <div class="composer-actions">
+            <div class="composer-left-actions">
+              <button class="composer-icon-btn" aria-label="Attach file">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                </svg>
+              </button>
+              <button class="composer-icon-btn" aria-label="Insert image">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </button>
+              <button class="composer-icon-btn" aria-label="Insert code">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+              </button>
+              <button class="composer-icon-btn" aria-label="Voice input">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+              </button>
+              <span class="char-counter" id="charCounter">0</span>
+            </div>
+            <div class="composer-right-actions">
+              <button class="send-btn" id="sendBtn" aria-label="Send message" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- CONTEXT PANEL -->
+    <aside class="context-panel drawer" id="contextPanel" aria-label="AI Workspace context">
+      <div class="context-header">
+        <span class="context-title">AI Workspace</span>
+        <button class="icon-btn" id="closeContextBtn" aria-label="Close context panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="context-section">
+        <div class="context-label">Connection</div>
+        <div class="context-value">
+          <span class="dot"></span>
+          Online
+        </div>
+      </div>
+
+      <div class="context-section">
+        <div class="context-label">Model</div>
+        <div class="context-value">Thomaz AI</div>
+      </div>
+
+      <div class="context-section">
+        <div class="context-label">Session</div>
+        <div class="context-value" id="contextSessionTitle">Project Architecture</div>
+      </div>
+
+      <div class="context-section">
+        <div class="context-label">Usage</div>
+        <div class="context-stat">
+          <span>Messages</span>
+          <span class="stat-value" id="statMessages">0</span>
+        </div>
+        <div class="context-stat">
+          <span>Characters</span>
+          <span class="stat-value" id="statChars">0</span>
+        </div>
+        <div class="context-stat">
+          <span>~Tokens</span>
+          <span class="stat-value" id="statTokens">0</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- SETTINGS DRAWER -->
+  <div class="settings-drawer" id="settingsDrawer" role="dialog" aria-label="Settings" aria-modal="true">
+    <div class="drawer-header">
+      <span class="drawer-title">Settings</span>
+      <button class="icon-btn" id="closeSettingsBtn" aria-label="Close settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <!-- Appearance -->
+      <div class="settings-group">
+        <div class="settings-group-title">Appearance</div>
+        <div class="settings-row">
+          <span class="settings-row-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            Dark theme
+          </span>
+          <button class="toggle on" id="themeToggle" aria-label="Toggle dark theme" aria-pressed="true"></button>
+        </div>
+      </div>
+
+      <!-- AI Configuration -->
+      <div class="settings-group">
+        <div class="settings-group-title">AI Configuration</div>
+        <div class="settings-row">
+          <span class="settings-row-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            API Endpoint
+          </span>
+          <input class="settings-input" id="apiEndpointInput" type="text" value="/api/chat" aria-label="API endpoint" readonly>
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+            </svg>
+            Model
+          </span>
+          <input class="settings-input" id="modelInput" type="text" value="Thomaz AI" aria-label="Model name">
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+            Temperature
+          </span>
+          <input class="settings-input" id="tempInput" type="number" min="0" max="2" step="0.1" value="0.7" style="width:80px;" aria-label="Temperature">
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h10"/>
+            </svg>
+            Max tokens
+          </span>
+          <input class="settings-input" id="maxTokensInput" type="number" min="1" max="32768" step="256" value="4096" style="width:100px;" aria-label="Max tokens">
+        </div>
+      </div>
+
+      <!-- Workspace -->
+      <div class="settings-group">
+        <div class="settings-group-title">Workspace</div>
+        <div class="settings-row">
+          <span class="settings-row-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            Auto-scroll
+          </span>
+          <button class="toggle on" id="autoScrollToggle" aria-label="Toggle auto-scroll" aria-pressed="true"></button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+            Enter to send
+          </span>
+          <button class="toggle on" id="enterSendToggle" aria-label="Toggle enter to send" aria-pressed="true"></button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+            Sound effects
+          </span>
+          <button class="toggle" id="soundToggle" aria-label="Toggle sound effects" aria-pressed="false"></button>
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="settings-group">
+        <div class="settings-group-title">About</div>
+        <div class="settings-row">
+          <span class="settings-row-label" style="font-size:12px;color:var(--text-muted);">
+            Thomaz AI — Private intelligence workspace.
+          </span>
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label" style="font-size:11px;color:var(--text-muted);">
+            Version 1.0.0 · Enterprise
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH OVERLAY -->
+  <div class="search-overlay" id="searchOverlay" role="dialog" aria-label="Search conversations">
+    <div class="search-modal">
+      <div class="search-input-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search conversations…" aria-label="Search conversations">
+      </div>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+  </div>
+
+  <!-- TOASTS -->
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    // ============================================
+    // THOMAZ AI — CORE APPLICATION SCRIPT
+    // ============================================
+
+    (function() {
+      'use strict';
+
+      // ===== STATE =====
+      const state = {
+        messages: 0,
+        chars: 0,
+        tokens: 0,
+        isOnline: true,
+        sidebarOpen: false,
+        contextOpen: false,
+        settingsOpen: false,
+        searchOpen: false,
+        preferences: {
+          autoScroll: true,
+          enterToSend: true,
+          sound: false,
+          theme: 'dark'
+        }
+      };
+
+      // ===== DOM REFS =====
+      const $ = (sel) => document.querySelector(sel);
+      const chatBox = document.getElementById('your-chat-box-id');
+      const inputField = document.getElementById('your-input-id');
+      const sendBtn = document.getElementById('sendBtn');
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('backdrop');
+      const contextPanel = document.getElementById('contextPanel');
+      const settingsDrawer = document.getElementById('settingsDrawer');
+      const searchOverlay = document.getElementById('searchOverlay');
+      const searchInput = document.getElementById('searchInput');
+      const searchResults = document.getElementById('searchResults');
+      const toastContainer = document.getElementById('toastContainer');
+      const charCounter = document.getElementById('charCounter');
+      const statMessages = document.getElementById('statMessages');
+      const statChars = document.getElementById('statChars');
+      const statTokens = document.getElementById('statTokens');
+      const sessionTitle = document.getElementById('sessionTitle');
+      const contextSessionTitle = document.getElementById('contextSessionTitle');
+
+      // ===== SAFE STORAGE =====
+      const safeStorage = {
+        get(key) {
+          try { return localStorage.getItem(key); } catch (e) { return null; }
+        },
+        set(key, val) {
+          try { localStorage.setItem(key, val); } catch (e) { /* noop */ }
+        },
+        getJSON(key, fallback) {
+          try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            return JSON.parse(raw);
+          } catch (e) { return fallback; }
+        },
+        setJSON(key, val) {
+          try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* noop */ }
+        }
+      };
+
+      // ===== LOAD PREFERENCES =====
+      function loadPreferences() {
+        const prefs = safeStorage.getJSON('thomaz_ai.preferences.v1', null);
+        if (prefs && typeof prefs === 'object') {
+          state.preferences = { ...state.preferences, ...prefs };
+        }
+        applyPreferences();
+      }
+
+      function savePreferences() {
+        safeStorage.setJSON('thomaz_ai.preferences.v1', state.preferences);
+      }
+
+      function applyPreferences() {
+        // Auto-scroll
+        const autoScrollToggle = document.getElementById('autoScrollToggle');
+        if (autoScrollToggle) {
+          autoScrollToggle.classList.toggle('on', state.preferences.autoScroll);
+          autoScrollToggle.setAttribute('aria-pressed', String(state.preferences.autoScroll));
+        }
+        // Enter to send
+        const enterToggle = document.getElementById('enterSendToggle');
+        if (enterToggle) {
+          enterToggle.classList.toggle('on', state.preferences.enterToSend);
+          enterToggle.setAttribute('aria-pressed', String(state.preferences.enterToSend));
+        }
+        // Sound
+        const soundToggle = document.getElementById('soundToggle');
+        if (soundToggle) {
+          soundToggle.classList.toggle('on', state.preferences.sound);
+          soundToggle.setAttribute('aria-pressed', String(state.preferences.sound));
+        }
+      }
+
+      // ===== TOASTS =====
+      function showToast(message, variant = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${variant}`;
+
+        const icons = {
+          success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>',
+          error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+          info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+        };
+
+        toast.innerHTML = (icons[variant] || icons.info) + '<span></span>';
+        toast.querySelector('span').textContent = message;
+
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(-8px)';
+          toast.style.transition = 'all 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }, 3200);
+      }
+
+      // ===== DRAWER MANAGEMENT =====
+      function openSidebar() {
+        state.sidebarOpen = true;
+        sidebar.classList.add('open');
+        backdrop.classList.add('active');
+        document.getElementById('mobileMenuBtn')?.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSidebar() {
+        state.sidebarOpen = false;
+        sidebar.classList.remove('open');
+        document.getElementById('mobileMenuBtn')?.setAttribute('aria-expanded', 'false');
+        if (!state.contextOpen && !state.settingsOpen && !state.searchOpen) {
+          backdrop.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      }
+
+      function openContext() {
+        state.contextOpen = true;
+        contextPanel.classList.add('open');
+        backdrop.classList.add('active');
+        document.getElementById('contextToggleBtn')?.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeContext() {
+        state.contextOpen = false;
+        contextPanel.classList.remove('open');
+        document.getElementById('contextToggleBtn')?.setAttribute('aria-expanded', 'false');
+        if (!state.sidebarOpen && !state.settingsOpen && !state.searchOpen) {
+          backdrop.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      }
+
+      function openSettings() {
+        state.settingsOpen = true;
+        settingsDrawer.classList.add('open');
+        backdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSettings() {
+        state.settingsOpen = false;
+        settingsDrawer.classList.remove('open');
+        if (!state.sidebarOpen && !state.contextOpen && !state.searchOpen) {
+          backdrop.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      }
+
+      function openSearch() {
+        state.searchOpen = true;
+        searchOverlay.classList.add('open');
+        backdrop.classList.add('active');
+        searchInput.value = '';
+        renderSearchResults('');
+        setTimeout(() => searchInput.focus(), 100);
+      }
+
+      function closeSearch() {
+        state.searchOpen = false;
+        searchOverlay.classList.remove('open');
+        if (!state.sidebarOpen && !state.contextOpen && !state.settingsOpen) {
+          backdrop.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      }
+
+      function closeAllDrawers() {
+        closeSidebar();
+        closeContext();
+        closeSettings();
+        closeSearch();
+        backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      // ===== BACKDROP CLICK =====
+      backdrop.addEventListener('click', closeAllDrawers);
+
+      // ===== DRAWER EVENT LISTENERS =====
+      document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+        if (state.sidebarOpen) closeSidebar();
+        else openSidebar();
+      });
+
+      document.getElementById('contextToggleBtn')?.addEventListener('click', () => {
+        if (state.contextOpen) closeContext();
+        else openContext();
+      });
+
+      document.getElementById('closeContextBtn')?.addEventListener('click', closeContext);
+
+      document.getElementById('settingsBtn')?.addEventListener('click', openSettings);
+      document.getElementById('closeSettingsBtn')?.addEventListener('click', closeSettings);
+
+      document.getElementById('searchBtn')?.addEventListener('click', openSearch);
+
+      // ===== ESCAPE KEY =====
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (state.searchOpen) { closeSearch(); return; }
+          if (state.settingsOpen) { closeSettings(); return; }
+          if (state.sidebarOpen) { closeSidebar(); return; }
+          if (state.contextOpen) { closeContext(); return; }
+        }
+      });
+
+      // ===== SEARCH =====
+      function renderSearchResults(query) {
+        const items = document.querySelectorAll('.history-item');
+        const q = query.toLowerCase().trim();
+        searchResults.innerHTML = '';
+        let found = 0;
+
+        items.forEach(item => {
+          const title = item.querySelector('.title')?.textContent?.toLowerCase() || '';
+          if (!q || title.includes(q)) {
+            found++;
+            const div = document.createElement('div');
+            div.className = 'search-result-item';
+            div.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span></span>';
+            div.querySelector('span').textContent = item.querySelector('.title')?.textContent || '';
+            div.addEventListener('click', () => {
+              const titleText = item.querySelector('.title')?.textContent || '';
+              if (sessionTitle) sessionTitle.textContent = titleText;
+              if (contextSessionTitle) contextSessionTitle.textContent = titleText;
+              closeSearch();
+              showToast('Switched to: ' + titleText, 'info');
+            });
+            searchResults.appendChild(div);
+          }
+        });
+
+        if (found === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'search-empty';
+          empty.textContent = 'No conversations found';
+          searchResults.appendChild(empty);
+        }
+      }
+
+      searchInput?.addEventListener('input', (e) => {
+        renderSearchResults(e.target.value);
+      });
+
+      // ===== TEXTAREA AUTO-RESIZE =====
+      function autoResize() {
+        inputField.style.height = 'auto';
+        const newHeight = Math.min(inputField.scrollHeight, 160);
+        inputField.style.height = newHeight + 'px';
+      }
+
+      inputField?.addEventListener('input', () => {
+        autoResize();
+        updateSendButton();
+        updateCharCounter();
+      });
+
+      function updateSendButton() {
+        const hasText = inputField.value.trim().length > 0;
+        sendBtn.classList.toggle('active', hasText);
+        sendBtn.disabled = !hasText;
+        sendBtn.setAttribute('aria-disabled', String(!hasText));
+      }
+
+      function updateCharCounter() {
+        const len = inputField.value.length;
+        charCounter.textContent = len > 0 ? len : '';
+      }
+
+      // ===== INITIAL FOCUS =====
+      setTimeout(() => {
+        inputField?.focus();
+        autoResize();
+      }, 200);
+
+      // ===== SESSION TITLE UPDATE =====
+      function updateSessionTitle(title) {
+        if (sessionTitle) sessionTitle.textContent = title;
+        if (contextSessionTitle) contextSessionTitle.textContent = title;
+      }
+
+      // ===== USAGE STATS =====
+      function updateStats() {
+        statMessages.textContent = state.messages;
+        statChars.textContent = state.chars.toLocaleString();
+        statTokens.textContent = state.tokens.toLocaleString();
+      }
+
+      // ===== RENDER EMPTY STATE =====
+      function renderEmptyState() {
+        chatBox.innerHTML = '';
+
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty-state';
+
+        // Logo
+        const logo = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        logo.setAttribute('viewBox', '0 0 32 32');
+        logo.setAttribute('fill', 'none');
+        logo.setAttribute('class', 'empty-logo');
+        logo.setAttribute('aria-hidden', 'true');
+        logo.innerHTML = `
+          <rect x="2" y="2" width="28" height="28" rx="7" stroke="url(#emptyGrad)" stroke-width="1.75" fill="none"/>
+          <path d="M10 11h12M16 11v11" stroke="url(#emptyGrad)" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="23" cy="9" r="2.2" fill="#06b6d4" stroke="none"/>
+          <circle cx="9" cy="23" r="1.6" fill="#7c3aed" stroke="none"/>
+          <defs>
+            <linearGradient id="emptyGrad" x1="0" y1="0" x2="32" y2="32">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+          </defs>
+        `;
+
+        const title = document.createElement('div');
+        title.className = 'empty-title';
+        title.textContent = 'Intelligence, engineered.';
+
+        const subtitle = document.createElement('div');
+        subtitle.className = 'empty-subtitle';
+        subtitle.textContent = 'Your private AI workspace.';
+
+        const chipsContainer = document.createElement('div');
+        chipsContainer.className = 'prompt-chips';
+
+        const prompts = [
+          'Design a scalable SaaS architecture',
+          'Analyze this codebase',
+          'Build a production-ready API',
+          'Help me plan my next project'
+        ];
+
+        prompts.forEach(text => {
+          const chip = document.createElement('button');
+          chip.className = 'prompt-chip';
+          chip.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg><span></span>';
+          chip.querySelector('span').textContent = text;
+          chip.addEventListener('click', () => {
+            inputField.value = text;
+            autoResize();
+            updateSendButton();
+            updateCharCounter();
+            inputField.focus();
+          });
+          chipsContainer.appendChild(chip);
+        });
+
+        emptyDiv.appendChild(logo);
+        emptyDiv.appendChild(title);
+        emptyDiv.appendChild(subtitle);
+        emptyDiv.appendChild(chipsContainer);
+        chatBox.appendChild(emptyDiv);
+      }
+
+      // ===== SCROLL TO BOTTOM =====
+      function scrollToBottom() {
+        if (state.preferences.autoScroll) {
+          requestAnimationFrame(() => {
+            chatBox.scrollTop = chatBox.scrollHeight;
+          });
+        }
+      }
+
+      // ===== USER MESSAGE =====
+      function appendUserMessage(text) {
+        // Remove empty state if present
+        const emptyState = chatBox.querySelector('.empty-state');
+        if (emptyState) emptyState.remove();
+
+        const div = document.createElement('div');
+        div.className = 'user-message-style';
+        div.textContent = text;
+        chatBox.appendChild(div);
+
+        state.messages++;
+        state.chars += text.length;
+        state.tokens += Math.ceil(text.length / 4);
+        updateStats();
+      }
+
+      // ===== AI MESSAGE =====
+      function appendAIMessage(text) {
+        const div = document.createElement('div');
+        div.className = 'shadow-message-style';
+
+        // Avatar
+        const avatar = document.createElement('div');
+        avatar.className = 'ai-avatar';
+        avatar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a5 5 0 0 1 5 5v2a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z"/><path d="M17 9h1a3 3 0 0 1 0 6h-1"/><path d="M7 9H6a3 3 0 0 0 0 6h1"/><circle cx="12" cy="18" r="4"/><line x1="12" y1="14" x2="12" y2="11"/></svg>';
+
+        // Content
+        const content = document.createElement('div');
+        content.className = 'ai-message-content';
+
+        const label = document.createElement('div');
+        label.className = 'ai-label';
+        label.textContent = 'THOMAZ AI';
+
+        const responseText = document.createElement('div');
+        responseText.className = 'ai-response-text';
+        responseText.textContent = text;
+
+        const timestamp = document.createElement('div');
+        timestamp.className = 'ai-timestamp';
+        timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        content.appendChild(label);
+        content.appendChild(responseText);
+        content.appendChild(timestamp);
+        div.appendChild(avatar);
+        div.appendChild(content);
+        chatBox.appendChild(div);
+
+        state.messages++;
+        state.chars += text.length;
+        state.tokens += Math.ceil(text.length / 4);
+        updateStats();
+      }
+
+      // ===== SEND MESSAGE (SUPPLIED CONTRACT — DO NOT MODIFY) =====
+      async function sendMessage() {
+        const inputFieldEl = document.getElementById('your-input-id');
+        const chatBoxEl = document.getElementById('your-chat-box-id');
+
+        const message = inputFieldEl.value.trim();
+        if (!message) return;
+
+        // Remove empty state
+        const emptyState = chatBoxEl.querySelector('.empty-state');
+        if (emptyState) emptyState.remove();
+
+        const userDiv = document.createElement('div');
+        userDiv.className = "user-message-style";
+        userDiv.innerText = message;
+        chatBoxEl.appendChild(userDiv);
+
+        // Update stats
+        state.messages++;
+        state.chars += message.length;
+        state.tokens += Math.ceil(message.length / 4);
+        updateStats();
+
+        inputFieldEl.value = '';
+        autoResize();
+        updateSendButton();
+        updateCharCounter();
+
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = "loading-indicator";
+        loadingDiv.innerText = "Processing...";
+        chatBoxEl.appendChild(loadingDiv);
+        chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
+
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message })
+          });
+
+          const data = await response.json();
+
+          document.getElementById('loading-indicator')?.remove();
+
+          const shadowDiv = document.createElement('div');
+          shadowDiv.className = "shadow-message-style";
+
+          // Build AI message structure
+          const avatar = document.createElement('div');
+          avatar.className = 'ai-avatar';
+          avatar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a5 5 0 0 1 5 5v2a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z"/><path d="M17 9h1a3 3 0 0 1 0 6h-1"/><path d="M7 9H6a3 3 0 0 0 0 6h1"/><circle cx="12" cy="18" r="4"/><line x1="12" y1="14" x2="12" y2="11"/></svg>';
+
+          const content = document.createElement('div');
+          content.className = 'ai-message-content';
+
+          const label = document.createElement('div');
+          label.className = 'ai-label';
+          label.textContent = 'THOMAZ AI';
+
+          const responseText = document.createElement('div');
+          responseText.className = 'ai-response-text';
+          responseText.textContent = data.text || 'No response received.';
+
+          const timestamp = document.createElement('div');
+          timestamp.className = 'ai-timestamp';
+          timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          content.appendChild(label);
+          content.appendChild(responseText);
+          content.appendChild(timestamp);
+          shadowDiv.appendChild(avatar);
+          shadowDiv.appendChild(content);
+          chatBoxEl.appendChild(shadowDiv);
+
+          // Update stats
+          const respText = data.text || '';
+          state.messages++;
+          state.chars += respText.length;
+          state.tokens += Math.ceil(respText.length / 4);
+          updateStats();
+
+          showToast('Response received', 'success');
+
+        } catch (error) {
+          document.getElementById('loading-indicator')?.remove();
+          console.error("Connection Error:", error);
+          showToast('SHADOW COMMAND OFFLINE: Check server logs.', 'error');
+        }
+
+        chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
+      }
+
+      // Make sendMessage globally available (for the supplied contract)
+      window.sendMessage = sendMessage;
+
+      // ===== EVENT LISTENERS FOR SENDING =====
+      sendBtn?.addEventListener('click', () => {
+        if (inputField.value.trim()) {
+          sendMessage();
+        }
+      });
+
+      inputField?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey && state.preferences.enterToSend) {
+          e.preventDefault();
+          if (inputField.value.trim()) {
+            sendMessage();
+          }
+        }
+      });
+
+      // Also support Shift+Enter for newline (default behavior)
+      inputField?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.shiftKey) {
+          // Allow default newline behavior
+          return;
+        }
+      });
+
+      // ===== PREFERENCE TOGGLES =====
+      document.getElementById('autoScrollToggle')?.addEventListener('click', function() {
+        this.classList.toggle('on');
+        state.preferences.autoScroll = this.classList.contains('on');
+        this.setAttribute('aria-pressed', String(state.preferences.autoScroll));
+        savePreferences();
+        showToast('Auto-scroll ' + (state.preferences.autoScroll ? 'enabled' : 'disabled'), 'info');
+      });
+
+      document.getElementById('enterSendToggle')?.addEventListener('click', function() {
+        this.classList.toggle('on');
+        state.preferences.enterToSend = this.classList.contains('on');
+        this.setAttribute('aria-pressed', String(state.preferences.enterToSend));
+        savePreferences();
+        showToast('Enter to send ' + (state.preferences.enterToSend ? 'enabled' : 'disabled'), 'info');
+      });
+
+      document.getElementById('soundToggle')?.addEventListener('click', function() {
+        this.classList.toggle('on');
+        state.preferences.sound = this.classList.contains('on');
+        this.setAttribute('aria-pressed', String(state.preferences.sound));
+        savePreferences();
+        showToast('Sound effects ' + (state.preferences.sound ? 'enabled' : 'disabled'), 'info');
+      });
+
+      document.getElementById('themeToggle')?.addEventListener('click', function() {
+        this.classList.toggle('on');
+        state.preferences.theme = this.classList.contains('on') ? 'dark' : 'light';
+        this.setAttribute('aria-pressed', String(state.preferences.theme === 'dark'));
+        savePreferences();
+        showToast('Theme preference saved', 'success');
+      });
+
+      // ===== NEW CHAT =====
+      document.getElementById('newChatBtn')?.addEventListener('click', () => {
+        // Clear chat
+        chatBox.innerHTML = '';
+        state.messages = 0;
+        state.chars = 0;
+        state.tokens = 0;
+        updateStats();
+        updateSessionTitle('New Conversation');
+        renderEmptyState();
+        showToast('New conversation started', 'info');
+        closeSidebar();
+        setTimeout(() => inputField?.focus(), 200);
+      });
+
+      // ===== HISTORY ITEMS =====
+      document.querySelectorAll('.history-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+          const title = item.querySelector('.title')?.textContent || 'Conversation';
+          updateSessionTitle(title);
+          showToast('Switched to: ' + title, 'info');
+          closeSidebar();
+        });
+      });
+
+      // ===== PROFILE =====
+      document.getElementById('profileBtn')?.addEventListener('click', () => {
+        showToast('Profile: Thomaz M. — Private workspace', 'info');
+      });
+
+      // ===== SETTINGS INPUTS =====
+      ['modelInput', 'tempInput', 'maxTokensInput'].forEach(id => {
+        const el = document.getElementById(id);
+        el?.addEventListener('change', () => {
+          showToast('Settings saved', 'success');
+        });
+      });
+
+      // ===== INITIALIZATION =====
+      function init() {
+        loadPreferences();
+        renderEmptyState();
+        updateStats();
+        updateSendButton();
+        updateCharCounter();
+        autoResize();
+
+        // Set initial online status
+        state.isOnline = true;
+
+        // Check if there's saved history
+        const savedHistory = safeStorage.getJSON('thomaz_ai.history.v1', null);
+        if (savedHistory && Array.isArray(savedHistory) && savedHistory.length > 0) {
+          // Could restore, but we start fresh for demo
+        }
+
+        console.log('THOMAZ AI — Intelligence, engineered.');
+        console.log('Private intelligence workspace ready.');
+      }
+
+      init();
+
+    })();
+  </script>
+</body>
+</html>
